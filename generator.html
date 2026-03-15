@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR / Barcode Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="card" style="width:500px;">
+        <h2>QR & Barcode Generator</h2>
+
+        <select id="action">
+            <option value="ADD">Add Item</option>
+            <option value="WITHDRAW">Withdraw Item</option>
+        </select>
+
+        <input type="text" id="itemName" placeholder="Item name (ex: Alcohol)">
+        <input type="number" id="quantity" placeholder="Quantity">
+
+        <button onclick="generate()">Generate</button>
+
+        <h3>QR Code</h3>
+        <canvas id="qrcode"></canvas>
+        <br>
+        <button onclick="downloadQR()">Download QR</button>
+
+        <h3 style="margin-top:20px;">Barcode</h3>
+        <svg id="barcode"></svg>
+        <br>
+        <button onclick="downloadBarcode()">Download Barcode</button>
+
+        <br><br>
+        <button onclick="back()">Back to Dashboard</button>
+    </div>
+</div>
+
+<script>
+function generate() {
+    const action = document.getElementById("action").value;
+    const itemName = document.getElementById("itemName").value.trim();
+    const qty = document.getElementById("quantity").value;
+
+    if (!item || !qty){
+        alert("Please fill in item name and quantity.");
+        return;
+    }
+
+    const qrText = `http://192.168.1.7:5000/scan?action=${action}&item=${item}&qty=${qty}`;
+
+    QRCode.toCanvas(document.getElementById("qrcode"), qrText, {
+        width: 200
+    });
+
+    JsBarcode("#barcode", qrText, {
+        format:"CODE128",
+        width: 2,
+        height: 80,
+        displayValue: false
+    });
+}
+
+function downloadQR() {
+    const canvas = document.getElementById("qrcode");
+    const link = document.createElement("a");
+    link.download = "qrcode.png";
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+function downloadBarcode() {
+    const svg = document.getElementById("barcode");
+    const serializer = new XMLSerializer();
+    const source = serializer.serializeToString(svg);
+
+    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "barcode.svg";
+    link.click();
+}
+
+function back() {
+    window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>

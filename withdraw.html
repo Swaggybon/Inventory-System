@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Withdraw Item</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>Withdraw Item</h2>
+
+<input id="item" placeholder="Item name">
+<input type="number" id="qty" placeholder="Quantity to withdraw">
+
+<button onclick="withdraw()">Withdraw</button>
+
+<p id="msg"></p>
+
+<table>
+<tr>
+    <th>Item</th>
+    <th>Total Quantity</th>
+</tr>
+<tbody id="table"></tbody>
+</table>
+
+<button onclick="back()">Back to Dashboard</button>
+
+</div>
+</div>
+
+<script>
+const itemInput = document.getElementById("item");
+const qtyInput = document.getElementById("qty");
+const msg = document.getElementById("msg");
+const table = document.getElementById("table");
+
+async function loadTable() {
+    try {
+        const response = await fetch('http://localhost:5000/api/inventory');
+        const data = await response.json();
+        
+        const table = document.getElementById("table");
+        table.innerHTML = ""; // Clear the table first
+
+        data.forEach(item => {
+            const row = `<tr>
+                <td>${item.item_name}</td>
+                <td>${item.quantity}</td>
+            </tr>`;
+            table.innerHTML += row;
+        });
+    } catch (err) {
+        console.error("Error loading table:", err);
+    }
+}
+
+async function withdraw() {
+    const item = document.getElementById("item").value.trim();
+    const qty = parseInt(document.getElementById("qty").value);
+
+    if (!item || isNaN(qty)) {
+        alert("Please enter a valid item name and quantity");
+        return;
+    }
+
+    const response = await fetch('http://localhost:5000/api/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            item, 
+            qty,
+            username: localStorage.getItem("username")  
+        })
+    });
+
+    if (response.ok) {
+        const updated = await response.json();
+        document.getElementById("msg").innerHTML = `Withdrew ${qty}. Remaining: ${updated.quantity}`;
+        loadTable(); // This now works and refreshes the list from the DB
+    } else {
+        const errorText = await response.text();
+        alert("Error: " + errorText);
+    }
+}
+
+function back() {
+    window.location.href = "dashboard.html";
+}
+
+loadTable();
+</script>
+
+
+</body>
+</html>

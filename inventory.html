@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Item</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Clinic Inventory</h2>
+
+        <input id="item" placeholder="Item name">
+        <input type="number" id="qty" placeholder="Quantity">
+
+        <button onclick="addItem()">Add Item</button>
+
+        <p id="msg"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Total Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+
+        <button onclick="back()">Back to Dashboard</button>
+    </div>
+</div>
+
+<script>
+const itemInput = document.getElementById("item");
+const qtyInput = document.getElementById("qty");
+const table = document.getElementById("table");
+const msg = document.getElementById("msg");
+
+// 1. Function to go back
+function back() {
+    window.location.href = "dashboard.html";
+}
+
+// 2. Load data from Database
+async function loadTable() {
+    try {
+        const response = await fetch('http://localhost:5000/api/inventory');
+        const data = await response.json();
+        table.innerHTML = "";
+        data.forEach(item => {
+            table.innerHTML += `<tr><td>${item.item_name}</td><td>${item.quantity}</td></tr>`;
+        });
+    } catch (err) {
+        console.error("Failed to load table:", err);
+    }
+}
+
+// 3. Add Item to Database
+async function addItem() {
+    const item = itemInput.value.trim();
+    const qty = parseInt(qtyInput.value);
+
+    if (!item || isNaN(qty)) {
+        msg.style.color = "red";
+        msg.innerText = "Please enter a valid item and quantity.";
+        return;
+    }
+
+    try {
+        // Change: Ensure this matches your backend "ADD" route (usually /api/add)
+        const response = await fetch('http://localhost:5000/api/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                item: item,
+                qty: qty,
+                username: localStorage.getItem("username")
+
+            })
+        });
+
+        if (response.ok) {
+            msg.style.color = "green";
+            msg.innerText = "Item added successfully!";
+            itemInput.value = "";
+            qtyInput.value = "";
+            loadTable(); // Refresh the list automatically
+        } else {
+            const errorText = await response.text();
+            msg.style.color = "red";
+            msg.innerText = `Error ${response.status}: ${errorText}`;
+        }
+
+    } catch (err) {
+        msg.style.color = "red";
+        msg.innerText = "Server error";
+        console.error(err)
+    }
+}
+
+// Run on startup
+loadTable();
+</script>
+
+</body>
+</html>

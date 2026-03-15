@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <h1>Local Storage</h1>
+
+    <div class="nav-buttons">
+        <button class="withdraw" onclick="goWithdraw()">WITHDRAW ITEM</button>
+        <button class="add" onclick="goAdd()">ADD ITEM</button>
+        <button class="logout" onclick="logout()">LOGOUT</button>
+    </div>
+
+    <div class="user-profile">
+        <img src="profile.png" alt="Profile" class="profile-pic">
+        <span id="usernameDisplay"></span>
+    </div>
+</div>
+
+<div class="container">
+    <h2>DASHBOARD</h2>
+</div>
+
+<div class="table-wrapper">
+    <table class="inventory-table">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Total Quantity</th>
+            </tr>
+        </thead>
+        <tbody id="dashboardTable">
+            <!-- Data loads here -->
+        </tbody>
+    </table>
+</div>
+
+<div class="card" style="margin-top:30px; width:500px;">
+    <h3>Upload QR Code</h3>
+    <input type="file" id="qrFile" accept="image/*">
+    <p id="botResponse" style="margin-top:15px; font-weight:bold;"></p>
+</div>
+
+
+
+<script>
+if (localStorage.getItem("loggedIn") !== "true") {
+    window.location.href = "login.html";
+}
+
+function goAdd() {
+    window.location.href = "inventory.html";
+}
+
+function goWithdraw() {
+    window.location.href = "withdraw.html";
+}
+
+function logout() {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "login.html";
+}
+
+/* ===== LOAD INVENTORY DATA ===== */
+async function loadDashboardTable() {
+    try {
+        const response = await fetch('http://localhost:5000/api/inventory');
+        
+        // Check if the server actually sent data back
+        if (!response.ok) throw new Error("Server not responding");
+
+        const inventory = await response.json();
+        const table = document.getElementById("dashboardTable");
+
+        table.innerHTML = ""; // Clear the "loading" or old data
+        
+        inventory.forEach(item => {
+            // Logic for visual alerts
+            const isLow = item.quantity <= item.threshold;
+            const color = isLow ? "red" : "black";
+            const weight = isLow ? "bold" : "normal";
+
+            table.innerHTML += `
+                <tr style="color: ${color}; font-weight: ${weight}">
+                    <td>${item.item_name} ${isLow ? '⚠️' : ''}</td>
+                    <td>${item.quantity}</td>
+                </tr>`;
+        });
+    } catch (error) {
+        console.error("Connection Error:", error);
+        document.getElementById("dashboardTable").innerHTML = 
+            "<tr><td colspan='2' style='color:red'>Cannot connect to server. Is node server.js running?</td></tr>";
+    }
+}
+window.onload = loadDashboardTable;
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+<script>
+const qrInput = document.getElementById("qrFile");
+const botResponse = document.getElementById("botResponse");
+
+qrInput.addEventListener("change", async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        img.src = e.target.result;
+    };
+
+    img.onload = async function() {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+            botResponse.innerHTML = "🤖 Bot: Checking item...";
+
+            const response = await fetch("http://localhost:5000/api/scan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ qrData: code.data })
+            });
+
+            const data = await response.json();
+
+            if (data.found) {
+                const item = data.item;
+                botResponse.innerHTML = 
+                `🤖 Bot: <br>
+                Item: ${item.item_name} <br>
+                Quantity: ${item.quantity} <br>
+                ${item.quantity <= item.threshold ? "⚠️ Low Stock!" : "✅ Stock OK"}`;
+            } else {
+                botResponse.innerHTML = "🤖 Bot: Item not found in database.";
+            }
+
+        } else {
+            botResponse.innerHTML = "❌ No QR code detected in image.";
+        }
+    };
+
+    reader.readAsDataURL(file);
+});
+</script>
+
+
+
+</body>
+</html>

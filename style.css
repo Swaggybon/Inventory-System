@@ -1,0 +1,192 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f4f6f8;
+}
+
+/* TOP BAR */
+.navbar {
+    background: #0b0b1a;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar h1 {
+    font-size: 20px;
+}
+
+.nav-buttons button {
+    margin-left: 10px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.withdraw {
+    background: #1e40ff;
+    color: white;
+}
+
+.add {
+    background: #ffd500;
+}
+
+.logout {
+    background: #ff3b3b;
+    color: white;
+}
+
+/* CENTER CARD */
+.container {
+    display: flex;
+    justify-content: center;
+    margin-top: 60px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    width: 360px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 6px;
+}
+
+/* LOGIN PAGE CENTER BOX */
+.login-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f6f8;
+}
+
+.login-box {
+    background: white;
+    width: 300px;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-bottom: 20px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.login-box button:hover {
+    background: #0056b3;
+}
+.login-box .error {
+    color: red;
+    margin-top: 10px;
+}
+
+.weak {
+    color: red;
+    font: bold;
+}
+
+.medium {
+    color: orange;
+    font: bold;
+}
+
+.strong {
+    color: green;
+    font: bold;
+}
+
+.match {
+    border: 2px solid green;
+}
+
+.no-match {
+    border: 2px solid red;
+}
+
+.table-wrapper {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.inventory-table {
+    width: 80%;
+    border-collapse: collapse;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.inventory-table th,
+.inventory-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.inventory-table th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: bold;
+}
+
+.inventory-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.inventory-table tr:hover {
+    background-color: #e6f2ff;
+}
+
+/* Add this to your style.css if not already there */
+.low-stock {
+    color: red !important;
+    font-weight: bold;
+    background-color: #ffe6e6; /* Light red background for the row */
+}
+
